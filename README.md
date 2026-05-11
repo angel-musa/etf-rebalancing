@@ -1,51 +1,81 @@
-# ETF Portfolio Analytics & Rebalancing Engine
+# ETF Intelligence Dashboard
 
-## Project Overview
-This project is a sophisticated, clean, and professional web-based ETF analytics and rebalancing tool built with Python and Streamlit. It allows users to benchmark a selection of ETFs and a constructed portfolio against a chosen market index (like SPY). It automatically calculates key performance metrics, visualizes rolling statistics, and generates actionable rebalancing signals based on predefined quantitative logic.
+A Streamlit-based portfolio analytics tool for wealth managers and quantitative analysts. It fetches live market data, computes risk-adjusted performance metrics, generates rule-based rebalancing signals, and lets you interactively adjust portfolio weights in real time.
 
-## Why it Matters in Wealth Management
-In wealth management and asset allocation, understanding relative performance and risk is crucial. This dashboard automates the workflow of:
-- Tracking portfolio metrics (Sharpe, Beta, Max Drawdown).
-- Identifying underperforming assets (high relative volatility and lagging returns).
-- Flagging outperforming assets for potential increases in allocation.
-By providing a clear, unbiased "signal," it supports data-driven portfolio rebalancing decisions, eliminating emotional biases.
+## Problem
+
+Portfolio managers constantly monitor ETF performance relative to benchmarks, but this workflow is manual and error-prone: pulling data from multiple sources, computing Sharpe ratios and drawdowns in spreadsheets, and making allocation decisions without a unified view. This dashboard automates that entire process in a single interface.
 
 ## Features
-- **Dynamic Asset Selection via CSV**: By default, the application runs using a generated test portfolio (`test_portfolio.csv`). You can override this by uploading your own CSV file with current portfolio positions (`Ticker` and `Weight`).
-- **KPI Metrics**: Real-time calculation of Annualized Return, Volatility, Sharpe Ratio, Beta, and Max Drawdown.
-- **Interactive Visualizations**: Cumulative return charts, rolling 60-day volatility, and rolling 60-day correlation using Plotly.
-- **Automated Signals**: 
-  - *Review*: If 60-day return lags benchmark by >3% and volatility is higher than benchmark.
-  - *Increase*: If asset outperforms benchmark over 60 days with lower volatility.
-  - *Hold*: Otherwise.
-- **Exportable Reports**: One-click CSV download for signals and current trailing metrics.
 
-## Installation Steps
-1. Clone the repository and navigate to the project directory:
-   ```bash
-   cd c:\projects\etfs
-   ```
-2. Create and activate a Python virtual environment:
-   ```bash
-   # Windows
-   python -m venv venv
-   venv\Scripts\activate
+- **AI Portfolio Intelligence** — health score (0–100), market regime detection (low/normal/high vol), and rule-based insights surfaced automatically
+- **Interactive Holdings Tab** — view current positions with live metrics (return, vol, Sharpe, beta, max drawdown); adjust weights via sliders and see the portfolio update in real time
+- **Rebalancing Signals** — rule-based signals (Increase / Hold / Review) based on 60-day return vs. benchmark and relative volatility; one-click "Apply Suggested Weights"
+- **Performance Charts** — cumulative returns, rolling 60-day volatility, cross-asset correlation heatmap, weight distribution
+- **CSV Upload** — bring your own portfolio (`Ticker`, `Weight` columns); falls back to a built-in test portfolio
+- **Exportable Reports** — download signals and trailing metrics as CSV
 
-   # macOS/Linux
-   python -m venv venv
-   source venv/bin/activate
-   ```
-3. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Run the Streamlit application:
-   ```bash
-   streamlit run app.py
-   ```
+## Signal Logic
+
+| Signal | Condition |
+|--------|-----------|
+| **Increase** | 60D return > benchmark AND volatility < benchmark |
+| **Review** | 60D return lags benchmark by >3% AND volatility > benchmark |
+| **Hold** | Everything else |
+
+## Setup
+
+**Requirements:** Python 3.9+
+
+```bash
+# 1. Clone and enter the project
+git clone <repo-url>
+cd etfs
+
+# 2. Create and activate a virtual environment
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+# macOS/Linux
+source venv/bin/activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Run
+streamlit run app.py
+```
+
+The app opens at `http://localhost:8501`.
+
+## Portfolio CSV Format
+
+Upload a CSV with two columns to use your own holdings:
+
+```csv
+Ticker,Weight
+AAPL,0.20
+MSFT,0.20
+GOOGL,0.15
+AMZN,0.15
+META,0.10
+```
+
+Weights are automatically normalized to sum to 1.0.
 
 ## Example Tickers
-- **Equities**: SPY (S&P 500), QQQ (Nasdaq 100), IWM (Russell 2000)
-- **International**: EFA (EAFE), EEM (Emerging Markets)
-- **Fixed Income**: AGG (US Aggregate Bond), TLT (20+ Year Treasury)
-- **Sectors**: XLF (Financials), XLK (Technology), XLV (Health Care)
+
+| Category | Tickers |
+|----------|---------|
+| US Broad Market | SPY, QQQ, IWM |
+| International | EFA, EEM |
+| Fixed Income | AGG, TLT |
+| Sectors | XLF, XLK, XLV |
+
+## Stack
+
+- **Frontend**: Streamlit 1.57, Plotly
+- **Data**: yfinance (live prices, 1hr cache)
+- **Analytics**: pandas, NumPy, scikit-learn
+- **Theme**: custom dark UI (`#0a0e1a` background, `#00D4FF` accent)
