@@ -27,21 +27,14 @@ def load_data(tickers, start_date, end_date):
         # If single ticker, yf returns Series for 'Adj Close'
         # If multiple tickers, yf returns DataFrame with MultiIndex columns
         if isinstance(data.columns, pd.MultiIndex):
-            # Try 'Adj Close', fallback to 'Close'
-            if 'Adj Close' in data.columns.levels[0]:
-                prices = data['Adj Close']
-            else:
-                prices = data['Close']
+            price_col = 'Adj Close' if 'Adj Close' in data.columns.get_level_values(0) else 'Close'
+            prices = data[price_col]
         else:
-             if 'Adj Close' in data.columns:
-                 prices = data[['Adj Close']].rename(columns={'Adj Close': tickers[0]})
-             else:
-                 prices = data[['Close']].rename(columns={'Close': tickers[0]})
+            price_col = 'Adj Close' if 'Adj Close' in data.columns else 'Close'
+            prices = data[[price_col]].rename(columns={price_col: tickers[0]})
                  
         prices.dropna(how='all', inplace=True)
-        # Forward fill missing prices, then backward fill just in case
-        prices.fillna(method='ffill', inplace=True)
-        prices.fillna(method='bfill', inplace=True)
+        prices = prices.ffill().bfill()
         
         return prices
     except Exception as e:
